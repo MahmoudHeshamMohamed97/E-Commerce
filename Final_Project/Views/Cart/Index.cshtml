@@ -1,0 +1,155 @@
+﻿@model Final_Project.Controllers.CartController
+@{
+    ViewData["Title"] = "Index";
+    Layout = "_UserLayout";
+}
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<style>
+   
+</style>
+<section class="jumbotron text-center">
+    <div class="container">
+        <h1 class="jumbotron-heading">Shopping CART</h1>
+    </div>
+</section>
+<div class="container mb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+
+                @if (ViewBag.cart != null)
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Available</th>
+                                <th scope="col" class="text-center">Color</th>
+                                <th scope="col" class="text-center">Size</th>
+                                <th scope="col" class="text-center">Quantity</th>
+                                <th scope="col" class="text-right">Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in ViewBag.cart)
+                            {
+                            <tr>
+                                <td><img src="@item.Product.Image" height="50" width="50" /> </td>
+                                <td>@item.Product.Name</td>
+                                <td>@item.Product.Stock In stock</td>
+
+                                <td class="text-right">
+                                    <div class="form-group">
+                                        <select onchange="updateColor(event,@item.ID)" class="form-control">
+                                            @foreach (var color in ViewBag.Colors)
+                                            {
+                                                if (item.Color == color)
+                                                {
+                                                    <option value="@color" selected>@color</option>
+                                                }
+
+                                                else
+                                                {
+                                                    <option value="@color">@color</option>
+                                                }
+
+
+                                            }
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="text-right">
+
+                                    <div class="form-group">
+                                        @if (item.Product.Category.Name == "Shoes")
+                                        {
+                                            <select onchange="updateSize(event,@item.ID)" class="form-control">
+                                                @foreach (var size in ViewBag.shoesSizes)
+                                                {
+                                                    if (item.Size == size)
+                                                    {
+                                                        <option value="@size" selected>@size</option>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <option value="@size">@size</option>
+                                                    }
+
+
+                                                }
+
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <select onchange="updateSize(event,@item.ID)" class="form-control">
+                                                @foreach (var size in ViewBag.clothesSizes)
+                                                {
+                                                    if (item.Size == size)
+                                                    {
+                                                        <option value="@size" selected>@size</option>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <option value="@size">@size</option>
+                                                    }
+                                                }
+                                            </select>
+                                        }
+
+                                    </div>
+                                </td>
+                                <td class="justify-content-center"><input type="number" onkeydown="return false" onchange="changeQuantity(event,@item.ID)" onchang min="1" max="@item.Product.Stock" name="@item.ID" class="form-control Quantity" value="@item.Quantity" /></td>
+                                <td class="text-right">$@(item.Product.Price*item.Quantity)</td>
+                                <td class="text-right"><a asp-action="Remove" asp-route-id="@item.ID" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> </a> </td>
+                            </tr>
+                            }
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><strong>Total</strong></td>
+                                <td class="text-right"><strong>$@ViewBag.total</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <h1>Your Cart is Empty</h1>
+                }
+            <div>
+                <a class="btn btn-secondary mr-4" asp-controller="HomeUser" asp-action="Index">Continue Shopping</a>
+                @if (ViewBag.cart != null)
+                {
+                    <a class="btn btn-success" asp-controller="Orders" asp-route-total="@ViewBag.total" asp-action="Create">CheckOut</a>
+                }
+
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //document.querySelector(".Quantity").onchange = () => { console.log(document.querySelector(".Quantity").name); };
+
+    function changeQuantity(e,id) {
+        console.log(id + e.target.value);
+       location.href = '@Url.Action("ChangeQuantity", "Cart")?ItemId=' + id + '&quantity=' + e.target.value;
+    }
+    function updateColor(e,id) {
+          location.href = '@Url.Action("updateColor", "Cart")?ItemId=' + id + '&color=' + e.target.value;
+    }
+     function updateSize(e,id) {
+          location.href = '@Url.Action("updateSize", "Cart")?ItemId=' + id + '&size=' + e.target.value;
+    }
+</script>

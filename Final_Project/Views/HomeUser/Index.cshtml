@@ -1,0 +1,273 @@
+﻿@using static Project.Controllers.ProductsController
+@model List<Product>
+
+@{
+    ViewData["Title"] = "All Products";
+    Layout = "_UserLayout";
+}
+
+@{
+    if (@TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-dismissible alert-success">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>@TempData["SuccessMessage"]</strong>.
+        </div>
+    }
+}
+<style>
+    .card {
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 6px 10px rgba(0,0,0,.08), 0 0 6px rgba(0,0,0,.05);
+        transition: .3s transform cubic-bezier(.155,1.105,.295,1.12),.3s box-shadow,.3s -webkit-transform cubic-bezier(.155,1.105,.295,1.12);
+        cursor: pointer;
+        position: relative;
+        border-color: white;
+        padding: 2px;
+        height: 520px;
+        transition: 1s all;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
+        }
+
+        .card img {
+            height: 200px;
+            width: 200px
+        }
+    .choosed{
+        border-radius: 10rem;
+        background-color: blue;
+        padding: 10px;
+        border: 1px solid white;
+        color: white;
+        width:max-content;
+    }
+    .choosed:hover{
+        color:white;
+    }
+    a{
+        text-decoration: none;
+    }
+    a:hover{
+        text-decoration: none;
+    }
+    .notChoosed{
+
+    }
+    .categories{
+        margin-left: 15px;
+    }
+</style>
+@*<h1>welcome to the user @ViewBag.user</h1>*@
+<div class="mb-5 d-flex justify-content-between" >
+    <h2 class="text-center font-weight-bold text-dark mb-5">Categories:</h2>
+    <a asp-action="Index" asp-route-id="0">All Categories</a>
+    @foreach (var item in ViewBag.Categories)
+    {
+        <a asp-action="Index" class="categories" asp-route-id="@item.ID">@item.Name</a>
+    }
+</div>
+
+<div class="row">
+    <div class="col-4">
+        <h6 class="text-center font-weight-bolder">Filteration</h6>
+        <hr>
+        <fieldset>
+            <legend>Brand</legend>
+            @foreach (var item in ViewBag.allBrands)
+            {
+                if (item == ViewBag.brand)
+                {
+                    <a href="#" onclick="filterBrand(event)" name="@item" class="d-block filter choosed">@item</a>
+                }
+                else
+                {
+                    <a href="#" onclick="filterBrand(event)" name="@item" class="d-block filter notChoosed">@item</a>
+                }
+            }
+        </fieldset>
+            <hr />
+            <fieldset>
+                <legend>Material</legend>
+                @foreach (var item in ViewBag.allMaterials)
+                {
+                    if (item == ViewBag.material)
+                    {
+                        <a href="#" onclick="filterMaterial(event)" name="@item" class="d-block filter choosed">@item</a>
+                    }
+                    else
+                    {
+                        <a href="#" onclick="filterMaterial(event)" name="@item" class="d-block filter notChoosed">@item</a>
+                    }
+                }
+            </fieldset>
+            <hr />
+            <fieldset>
+                <legend> Price</legend>
+                <form asp-action="Index" method="post">
+                    <div class="form-group">
+                        <label class="text-black-50">From </label>
+                        <input required type="number" min="0" id="minprice" class="form-control w-50" value="0" name="minprice" />
+                    </div>
+                    <div class="form-group">
+                        <label class="text-black-50">To</label>
+                        <input required type="number" min="0" id="maxprice" class="form-control w-50" value="0" name="maxprice" />
+                    </div>
+                    <button type="button" onclick="filterPrice()" class="btn btn-primary" >Apply</button>
+                </form>
+            </fieldset>
+
+
+    </div>
+    <div class="row d-flex col-8 justify-content-center">
+        @*<h2 class="text-center font-weight-bold text-dark mb-5"> Our Products</h2>*@
+
+        @foreach (var item in Model)
+        {
+
+
+            @if (item.Stock > 0)
+            {
+
+                <div class="col-md-4 pb-2">
+
+                    <div class="card">
+                        <img src="@item.Image" class="card-img-top img-fluid" alt="Product Image">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Name</h5>
+                            <p class="card-text">@item.Description</p>
+
+                            <div class="smallData">
+                                @*<p>Weight: <b>@item.Weight</b></p>*@
+                                <p>Stock: <b>@item.Stock</b></p>
+                            </div>
+                            @if (item.Discount != 0)
+                            {
+                                <div class="smallData">
+                                     <p>Price: <s>&pound; @item.Price</s></p>
+                                    <p>Discount: <b style="color:red">@item.Discount &pound;</b></p>
+                                    <p>After Discount: <b>&pound; @(item.Price - item.Discount)</b></p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="smallData">
+                                    <p>Price: <b>&pound; @item.Price</b></p>
+                                </div>
+                            }
+
+                        </div>
+                        <div> <a asp-controller="Cart" asp-action="Buy" asp-route-id="@item.ID" class="card-link btn btn-outline-primary badge-pill btn-block">Add To Cart <i class="fa fa-shopping-cart"></i></a></div>
+
+                    </div>
+
+                </div>
+
+                    <!--<div class="card col-lg-3 col-md-6 d-flex mb-2 bg-white" style="height:500px">
+                    <img class="card-img-top w-100" style="height:250px" src="@item.Image" alt="Card image cap">
+                    <div class="card-body">
+                        <p class="card-title font-weight-bold">@item.Name</p>
+                        <p class="card-text font-weight-bolder text-black-50">$@item.Price</p>
+                        <p class="text-danger">Available: @item.Stock</p>-->
+                        @*<div> <a asp-action="Details" asp-route-id="@item.ID" class="card-link btn btn-outline-secondary mb-1">Details</a></div>*@
+                        @*@using (Html.BeginForm(actionName: "Cart", controllerName: "Home", method: FormMethod.Post, htmlAttributes: new { id = item.ID }))
+                        {
+                            <div><button type="submit" class="card-link btn btn-outline-primary btn-block">Add To Cart</button></div>
+                        }*@
+                        <!--<div> <a asp-controller="Cart" asp-action="Buy" asp-route-id="@item.ID" class="card-link btn btn-outline-primary btn-block">Add To Cart <i class="fa fa-shopping-cart"></i></a></div>
+                        </div>
+                    </div>-->
+
+
+                        @*<div class="card col-lg-3 col-md-5 d-flex mt-4 mt-md-0 mb-2 mr-3">
+                            <img class='mx-auto img-thumbnail' src="@item.Image" width="auto" height="auto" />
+                            <div class="card-body text-center mx-auto">
+                                <div class='cvp'>
+                                    <h5 class="card-title font-weight-bold">@item.Name</h5>
+                                    <p class="card-text text-black-50">$@item.Price</p> <a asp-action="Details" asp-route-id="@item.ID" class="btn details px-auto">view details</a><br />
+                                    <a asp-controller="Cart" asp-action="Buy" asp-route-id="@item.ID" class="btn btn-outline-primary px-auto">ADD TO CART</a>
+                                </div>
+                            </div>
+                        </div>*@
+
+                    }
+
+        }
+    </div>
+    </div>
+    <script>
+
+        document.onload = () => {
+            sessionStorage.setItem("brand", null);
+            sessionStorage.setItem("material", null);
+        };
+        function filterBrand(e) {
+            e.preventDefault();
+            var currentPath = window.location.pathname;
+            if (sessionStorage.getItem("brand") == e.target.name) {
+                location.href = currentPath + "?brand=null&material=" + sessionStorage.getItem("material");
+                sessionStorage.setItem("brand", null);
+            }
+            else {
+                location.href = currentPath + "?brand=" + e.target.name + "&material=" + sessionStorage.getItem("material");
+                sessionStorage.setItem("brand", e.target.name);
+            }
+
+            //if (e.target.classList.contains("notChoosed")) {
+            //    e.target.classList.remove("notChoosed");
+            //    e.target.classList.add("choosed");
+            //}
+            //else {
+            //    e.target.classList.remove("choosed");
+            //    e.target.classList.add("notChoosed");
+            //}
+        }
+        function filterMaterial(e) {
+            e.preventDefault();
+            var currentPath = window.location.pathname;
+            if (sessionStorage.getItem("material") == e.target.name) {
+                location.href = currentPath + "?material=null&brand=" + sessionStorage.getItem("brand");
+                sessionStorage.setItem("material", null);
+            }
+            else {
+                location.href = currentPath + "?material=" + e.target.name + "&brand=" + sessionStorage.getItem("brand");
+                sessionStorage.setItem("material", e.target.name);
+            }
+
+            //if (e.target.classList.contains("notChoosed")) {
+            //    e.target.classList.remove("notChoosed");
+            //    e.target.classList.add("choosed");
+            //}
+            //else {
+            //    e.target.classList.remove("choosed");
+            //    e.target.classList.add("notChoosed");
+            //}
+        }
+        function filterPrice() {
+            var currentPath = window.location.pathname;
+            location.href = currentPath + "?material=" + sessionStorage.getItem("material") + "&brand=" + sessionStorage.getItem("brand")
+                + "&minprice=" + document.getElementById("minprice").value + "&maxprice=" + document.getElementById("maxprice").value;
+            //if (e.target.classList.contains("notChoosed")) {
+            //    e.target.classList.remove("notChoosed");
+            //    e.target.classList.add("choosed");
+            //}
+            //else {
+            //    e.target.classList.remove("choosed");
+            //    e.target.classList.add("notChoosed");
+            //}
+        }
+
+    //let allFilters = document.getElementsByClassName("filter");
+    //for (let i = 0; i < allFilters.length; i++) {
+    //    allFilters[i].onclick = function () {
+
+
+
+    //    }
+    //}
+
+    </script>
